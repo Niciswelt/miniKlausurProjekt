@@ -45,8 +45,6 @@ public class DbHelper extends JFrame {
     DbHelper() {
         initialize();
         createComponents();
-        connectTextField.grabFocus();
-        connectTextField.selectAll();
     }
 
     private void initialize() {
@@ -74,14 +72,12 @@ public class DbHelper extends JFrame {
         // connectButton
         connectButton.setFocusable(false);
         connectButton.addActionListener(e -> {
+            // todo
             try {
                 connect(connectTextField.getText());
                 prepareTables();
-
                 tabbedPane.setEnabledAt(1, true);
                 tabbedPane.setEnabledAt(2, true);
-
-                this.setTitle("Database Manager - " + dbName); // aktualisiert Fenstername
             } catch (SQLException ex) {
                 System.out.println("ERR  | " + ex);
                 showMessage(ex.toString());
@@ -180,7 +176,10 @@ public class DbHelper extends JFrame {
         System.out.println("INFO | Executing SQL:\n" + sql);
         return stmt.execute(sql) ? stmt.getResultSet() : null;
     }
-
+    /**
+     * Gibt alle Datenbanktabellennamen der aktuellen Verbindung zurück.
+     * @return einen {@link Vector<String>} mit den Namen der Datenbanktabellen.
+     */
     public Vector<String> nameTables() {
         Vector<String> nameTables = new Vector<>();
         String[] types = {"TABLE"};
@@ -189,14 +188,39 @@ public class DbHelper extends JFrame {
             //Tabellen anfragen
             ResultSet rs = con.getMetaData().getTables(catalogue, null, null, types);
             while (rs.next()) { //dem Vektor die Namen hinzufügen
-                nameTables.add(rs.getString(3));
+                nameTables.add(rs.getString(3)); //columnIndex 3 eines ResultSets ist der Tabellenname
             }
         } catch (SQLException ex) {
             System.out.println(ex);
         }
         return nameTables;
     }
+    /**
+     * Wird beim Auswählen einer Tabelle ausgeführt und bestimmt, ob {@link #refreshTable(int index)} verwendet werden
+     * muss.
+     * <p>
+     * Dies trifft zu bei der ersten Anfrage, eine Datenbanktabelle anzuzeigen
+     * @param index der zu anzuzeigenden Tabelle
+     */
+    void selectTable(int index) {
+        DbTableContainer dtc = databaseTablePanels.get(index);
 
+        if(!dtc.table.isEnabled()) { //erste Ansicht der Tabelle
+            refreshTable(index); //erstellt die Tabelle
+            dtc.table.setEnabled(true); //aktiviert table, um die Erstellung nachvollziehen zu können
+            prepareAdd(dtc.table); //richtet addPanel ein
+            return;
+        }
+        else {
+            System.out.println("loaded last known data for" + index);
+        }
+
+        prepareAdd(dtc.table); //richtet addPanel ein
+    }
+    /**
+     * Aktualisiert die aktuelle Tabelle.
+     * @param index der zu aktualisierenden Tabelle
+     */
     private void refreshTable(int index) {
         DbTableContainer dtc = databaseTablePanels.get(index);
         try {
@@ -212,6 +236,50 @@ public class DbHelper extends JFrame {
             System.out.println("ERR | " + ex);
         }
     }
+    void prepareAdd(JTable table) {
+        //Aktuelle Anzeige löschen
+        addPanel.removeAll();
+        addTupleTextFields.clear();
+
+        //Spaltennamen erhalten
+        int columnCount = table.getColumnCount();
+        String[] values = new String[columnCount];
+        for (int i= 0; i < columnCount; i++) {
+            values[i] = table.getColumnName(i);
+        }
+        //Layout
+        addPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(5,5,5,5);
+
+        //Komponenten hinzufügen
+        for (int i = 0; i < values.length; i++) {
+            //Labels hinzufügen
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            addPanel.add(new JLabel(values[i]), gbc);
+
+            //Textfelder zu Panel und Liste hinzufügen
+            gbc.gridx = 1;
+            JTextField textField = new JTextField(30);
+            addPanel.add(new JLabel(values[i]), gbc);
+            addTupleTextFields.add(textField);
+        }
+        //Spalten nach oben ausrichten
+        gbc.gridx = 0;
+        gbc.gridy = values.length;
+        gbc.weighty = 1.0;
+        addPanel.add(Box.createVerticalGlue(), gbc);
+        addPanel.repaint();
+    }
+
+    /**
+     * Führt ein INNER JOIN aus, um den eigentlichen Wert von Fremdschlüssel darzustellen.
+     * @param rs {@link ResultSet}, in welches die Fremdschlüssel entschlüsselt werden sollen
+     * @return {@link ResultSet} des INNER JOIN, wenn eines ausgeführt wurde, sonst das Übergebene
+     * @throws SQLException, wenn ein Fehler bei der Datenbankinteraktion auftritt oder die Verbindung geschlossen ist
+     */
 
     private ResultSet discloseForeignKeys(ResultSet rs) throws SQLException {
         String primaryKey = "id"; // Bezeichnung für Hauptschlüssel
