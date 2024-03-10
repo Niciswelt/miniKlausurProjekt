@@ -131,6 +131,9 @@ public class DbHelper extends JFrame {
             if (index > databaseTablePanels.size()-1) return; // wenn selektierte Tab über Anzahl der Tabellen, return
             System.out.println("INFO | Selected index " + index);
             selectTable(index);
+
+            refreshButton.setEnabled(true);
+            deleteTupleButton.setEnabled(true);
         });
 
         // addPanel
