@@ -1,10 +1,10 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.sql.*;
 import java.util.*;
+import java.util.List;
 
 public class DbHelper extends JFrame {
 
@@ -24,6 +24,9 @@ public class DbHelper extends JFrame {
     private JTextArea sqlTextArea;
     private JButton executeButton;
     private JButton clearButton;
+    private JPanel sqlResultPanel;
+    private JScrollPane sqlResultScrollPane;
+    private JPanel sqlPanel;
 
 
     // Datenbank Einstellungen
@@ -114,6 +117,29 @@ public class DbHelper extends JFrame {
                 JOptionPane.showMessageDialog(null, "ERROR: "+ex);
             }
         });
+
+        // SQL tab
+        // sqlResultArea
+        sqlResultPanel.setVisible(false);
+
+        // executeButton
+        executeButton.setFocusable(false);
+        executeButton.addActionListener(e -> {
+            try {
+                ResultSet rs = passSQL(sqlTextArea.getText());
+
+                if (rs == null) return;
+                sqlResultScrollPane.setViewportView(new JTable(TableHelper.getTableModel(rs)));
+                sqlResultPanel.setVisible(true);
+            } catch (SQLException ex) {
+                System.out.println("ERR  | " + ex);
+                showMessage(ex.toString());
+            }
+        });
+
+        // clearButton
+        clearButton.setFocusable(false);
+        clearButton.addActionListener(e -> sqlTextArea.setText(""));
     }
 
     private void connect(String dbName) throws SQLException {
@@ -151,6 +177,7 @@ public class DbHelper extends JFrame {
 
     private ResultSet passSQL(String sql) throws SQLException {
         Statement stmt = con.createStatement();
+        System.out.println("INFO | Executing SQL:\n" + sql);
         return stmt.execute(sql) ? stmt.getResultSet() : null;
     }
 
