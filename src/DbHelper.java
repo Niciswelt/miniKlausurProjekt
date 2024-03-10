@@ -221,7 +221,3 @@ public class DbHelper extends JFrame {
         JOptionPane.showMessageDialog(null, msg);
     }
 }
-//testfürcommit
-//githubonlinetest
-
-// testneucool
