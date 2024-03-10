@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.*;
 
@@ -34,6 +35,7 @@ public class DbHelper extends JFrame {
 
     // Andere
     List<DbTableContainer> databaseTablePanels;
+    List<JTextField> addTupleTextFields;
 
     DbHelper() {
         initialize();
@@ -102,7 +104,7 @@ public class DbHelper extends JFrame {
                 passSQL(new String(stringBuilder));
                 refreshTable(index); // Anzeige wird nach Ausführung aktualisiert
             } catch (SQLException ex) {
-                LOGGER.error("{0}", ex);
+                System.out.println("ERR  | " + ex);
                 JOptionPane.showMessageDialog(null, "ERROR: "+ex);
             }
         });
@@ -141,7 +143,7 @@ public class DbHelper extends JFrame {
         }
     }
 
-    private ResultSet passSql(String sql) throws SQLException {
+    private ResultSet passSQL(String sql) throws SQLException {
         Statement stmt = con.createStatement();
         return stmt.execute(sql) ? stmt.getResultSet() : null;
     }
@@ -161,8 +163,63 @@ public class DbHelper extends JFrame {
         return nameTables;
     }
 
+    private void refreshTable(int index) {
+        DbTableContainer dtc = databaseTablePanels.get(index);
+        try {
+            ResultSet rs = passSQL("SELECT * FROM " + dtc.tableName);
+            rs = discloseForeignKeys(rs); // Fremdschlüssel bei Bedarf entschlüsseln
+
+            // tableModel holen und anwenden
+            DefaultTableModel model = TableHelper.getTableModel(rs);
+            dtc.table.setModel(model);
+
+            dtc.lastUpdated = new GregorianCalendar(); // setzt lastUpdated auf die aktuelle Zeit
+
+            tableTabbedPane.repaint(); // stellt Richtigkeit des UIs sicher
+        } catch (SQLException ex){
+            System.out.println("ERR | " + ex);
+        }
+    }
+
+    private ResultSet discloseForeignKeys(ResultSet rs) throws SQLException {
+        String primaryKey = "id"; // Bezeichnung für Hauptschlüssel
+        String foreignPrefix = "F_"; // Prefix für Fremdschlüssel
+
+        ResultSetMetaData rsmd = rs.getMetaData();
+        String tableName = rsmd.getTableName(1); // Datenbanktabellenname
+
+        Vector<Integer> foreignColumns = new Vector<>(); // Vektor, welches die Indexe der Spalten mit Fremdschlüssel enthält
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            if (rsmd.getColumnName(i).startsWith(foreignPrefix)) foreignColumns.add(i);
+        }
+
+        if (foreignColumns.isEmpty()) return rs; // kein INNER JOIN notwendig, returned das ursprüngliche ResultSet
+
+        // 'SELECT tableName.id,'
+        StringBuilder builder = new StringBuilder("SELECT " + tableName + "." + primaryKey + ",");
+
+        // 'attribute1, attribute2,' ... (die Attribute sind Fremdschlüssel)
+        for (int columnIndex : foreignColumns) {
+            String foreignColumn = rsmd.getColumnName(columnIndex).replace(foreignPrefix, ""); // ohne 'F_'
+            builder.append(foreignColumn).append(",");
+        }
+        // löscht das letzte Komma, 'FROM tableName'
+        builder.deleteCharAt(builder.length()-1).append("\nFROM ").append(tableName);
+
+        // 'INNER JOIN attribute1 ON tableName.F_attribute1 = attribute1.id'
+        for (int columnIndex : foreignColumns) {
+            String foreignColumnLiteral = rsmd.getColumnName(columnIndex); // vollständiger Spaltenname, z.B. 'F_Bewertung'
+            String foreignColumn = foreignColumnLiteral.replace(foreignPrefix, ""); // ohne 'F_'
+            builder.append("\nINNER JOIN ").append(foreignColumn).append("\n");
+            builder.append("ON ").append(tableName).append(".").append(foreignColumnLiteral).append(" = ").append(foreignColumn).append(".").append(primaryKey);
+        }
+
+        return passSQL(new String(builder)); // führt INNER JOIN aus und returned das ResultSet
+    }
+
     private void showMessage(String msg) {
         JOptionPane.showMessageDialog(null, msg);
     }
 }
+//testfürcommit
 
