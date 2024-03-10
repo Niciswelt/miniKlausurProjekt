@@ -155,11 +155,19 @@ public class DbHelper extends JFrame {
         clearButton.addActionListener(e -> sqlTextArea.setText(""));
     }
 
+    /**
+     * Stellt eine Verbindung zur übergebenen Datenbank her.
+     * @param dbName {@link String} zur identifizierung der Datenbank
+     * @throws SQLException, wenn ein Fehler bei der Verbindung zur Datenbank auftritt
+     */
     private void connect(String dbName) throws SQLException {
         if (dbName.isEmpty()) return; // leerer Name -> return
         con = DriverManager.getConnection("jdbc:mysql://" + dbServer + ":" + dbPort + "/" + dbName, dbUser, dbPasswd);
     }
 
+    /**
+     * Erstellt Tabs für die Datenbanktabellen der verbundenen Datenbank und erstellt jeweils einen {@link DbTableContainer}.
+     */
     private void prepareTables() {
         tableTabbedPane.removeAll();
         databaseTablePanels.clear();
@@ -188,11 +196,18 @@ public class DbHelper extends JFrame {
         }
     }
 
+    /**
+     * Führt eine SQL-Abfrage durch.
+     * @param sql {@link String} mit SQL-Befehl, der ausgeführt werden soll
+     * @return Ein entsprechendes {@link ResultSet} oder null, falls keines vorhanden
+     * @throws SQLException, wenn ein Fehler bei der Datenbankinteraktion auftritt oder die Verbindung geschlossen ist
+     */
     private ResultSet passSQL(String sql) throws SQLException {
         Statement stmt = con.createStatement();
         System.out.println("INFO | Executing SQL:\n" + sql);
         return stmt.execute(sql) ? stmt.getResultSet() : null;
     }
+
     /**
      * Gibt alle Datenbanktabellennamen der aktuellen Verbindung zurück.
      * @return einen {@link Vector<String>} mit den Namen der Datenbanktabellen.
@@ -212,6 +227,7 @@ public class DbHelper extends JFrame {
         }
         return nameTables;
     }
+
     /**
      * Wird beim Auswählen einer Tabelle ausgeführt und bestimmt, ob {@link #refreshTable(int index)} verwendet werden
      * muss.
@@ -289,6 +305,8 @@ public class DbHelper extends JFrame {
         gbc.gridy = values.length;
         gbc.weighty = 1.0;
         addPanel.add(Box.createVerticalGlue(), gbc);
+
+        addTupleButton.setEnabled(true);
         addPanel.repaint();
     }
 
