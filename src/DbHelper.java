@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
@@ -72,16 +74,28 @@ public class DbHelper extends JFrame {
         // connectButton
         connectButton.setFocusable(false);
         connectButton.addActionListener(e -> {
-            // todo
             try {
                 connect(connectTextField.getText());
                 prepareTables();
+
                 tabbedPane.setEnabledAt(1, true);
                 tabbedPane.setEnabledAt(2, true);
+
+                this.setTitle("Database Manager - " + dbName); // aktualisiert Fenstername
             } catch (SQLException ex) {
                 System.out.println("ERR  | " + ex);
                 showMessage(ex.toString());
             }
+        });
+
+        // table tabbed pane
+        tableTabbedPane.setBorder(new EmptyBorder(5,5,5,5));
+        tableTabbedPane.addChangeListener(e -> {
+            int index = tableTabbedPane.getSelectedIndex(); // index aktueller Tabelle
+            if (index == -1) return;
+            if (index > databaseTablePanels.size()-1) return; // wenn selektierte Tab über Anzahl der Tabellen, return
+            System.out.println("INFO | Selected index " + index);
+            selectTable(index);
         });
 
         // addPanel
@@ -280,7 +294,6 @@ public class DbHelper extends JFrame {
      * @return {@link ResultSet} des INNER JOIN, wenn eines ausgeführt wurde, sonst das Übergebene
      * @throws SQLException, wenn ein Fehler bei der Datenbankinteraktion auftritt oder die Verbindung geschlossen ist
      */
-
     private ResultSet discloseForeignKeys(ResultSet rs) throws SQLException {
         String primaryKey = "id"; // Bezeichnung für Hauptschlüssel
         String foreignPrefix = "F_"; // Prefix für Fremdschlüssel
