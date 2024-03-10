@@ -147,6 +147,7 @@ public class DbHelper extends JFrame {
         Statement stmt = con.createStatement();
         return stmt.execute(sql) ? stmt.getResultSet() : null;
     }
+
     public Vector<String> nameTables() {
         Vector<String> nameTables = new Vector<>();
         String[] types = {"TABLE"};
@@ -172,8 +173,6 @@ public class DbHelper extends JFrame {
             // tableModel holen und anwenden
             DefaultTableModel model = TableHelper.getTableModel(rs);
             dtc.table.setModel(model);
-
-            dtc.lastUpdated = new GregorianCalendar(); // setzt lastUpdated auf die aktuelle Zeit
 
             tableTabbedPane.repaint(); // stellt Richtigkeit des UIs sicher
         } catch (SQLException ex){
