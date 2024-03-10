@@ -91,6 +91,39 @@ public class DbHelper extends JFrame {
             }
         });
 
+        //delete Button: Löscht ausgewählte Zeile der Datenbanktabelle
+        deleteTupleButton.setFocusable(false);
+        deleteTupleButton.setEnabled(false);
+        deleteTupleButton.addActionListener(e -> {
+            int index = tableTabbedPane.getSelectedIndex();
+            String tableName = tableTabbedPane.getTitleAt(index);
+
+            JTable table = databaseTablePanels.get(index).table; // aktuelle Tabelle
+            int row = table.getSelectedRow(); // ausgewählte Zeile
+            if (row == -1) return; // return, wenn keine Zelle ausgewählt
+            String columnName = table.getColumnName(0); // Name der ersten Spalte (meist ID)
+            String id = table.getValueAt(row, 0).toString(); // ruft ID der ausgewählten Zeile ab
+
+            // Baut SQL-Befehl
+            String sql = "DELETE FROM " + tableName + " WHERE " + tableName + "." + columnName + " = " + id;
+
+            // Führt SQL-Befehl aus
+            try {
+                passSQL(sql);
+                refreshTable(index); // aktualisiert Anzeige nach Löschung
+            } catch (SQLException ex) {
+                System.out.println(ex);;
+                JOptionPane.showMessageDialog(null, "ERROR: "+ex);
+            }
+        });
+        //refresh Button: Aktualisiert Tabellenanzeige
+        refreshButton.setFocusable(false);
+        refreshButton.setEnabled(false);
+        refreshButton.addActionListener(e -> {
+            int index = tableTabbedPane.getSelectedIndex(); // aktuelle Tabelle
+            refreshTable(index);
+        });
+
         // table tabbed pane
         tableTabbedPane.setBorder(new EmptyBorder(5,5,5,5));
         tableTabbedPane.addChangeListener(e -> {
