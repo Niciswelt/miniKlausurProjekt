@@ -226,7 +226,7 @@ public class DbHelper extends JFrame {
         addPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(5,5,5,5,);
+        gbc.insets = new Insets(5,5,5,5);
 
         //Komponenten hinzufügen
         for (int i = 0; i < values.length; i++) {
