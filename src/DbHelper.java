@@ -47,6 +47,8 @@ public class DbHelper extends JFrame {
     DbHelper() {
         initialize();
         createComponents();
+        connectTextField.grabFocus();
+        connectTextField.selectAll();
     }
 
     private void initialize() {
@@ -58,6 +60,7 @@ public class DbHelper extends JFrame {
         this.setVisible(true);
 
         databaseTablePanels = new ArrayList<>();
+        addTupleTextFields = new ArrayList<>();
     }
 
     private void createComponents() {
@@ -226,7 +229,7 @@ public class DbHelper extends JFrame {
             return;
         }
         else {
-            System.out.println("loaded last known data for" + index);
+            System.out.println("INFO | loaded last known data for " + index);
         }
 
         prepareAdd(dtc.table); //richtet addPanel ein
@@ -251,36 +254,37 @@ public class DbHelper extends JFrame {
         }
     }
     void prepareAdd(JTable table) {
-        //Aktuelle Anzeige löschen
+        // Aktuelle Anzeige löschen
         addPanel.removeAll();
         addTupleTextFields.clear();
 
-        //Spaltennamen erhalten
+        // Spaltennamen erhalten
         int columnCount = table.getColumnCount();
         String[] values = new String[columnCount];
-        for (int i= 0; i < columnCount; i++) {
+        for (int i = 0; i < columnCount; i++) {
             values[i] = table.getColumnName(i);
         }
-        //Layout
+
+        // Layout
         addPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(5,5,5,5);
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        //Komponenten hinzufügen
+        // Komponenten hinzufügen
         for (int i = 0; i < values.length; i++) {
-            //Labels hinzufügen
+            // Labels hinzufügen
             gbc.gridx = 0;
             gbc.gridy = i;
             addPanel.add(new JLabel(values[i]), gbc);
 
-            //Textfelder zu Panel und Liste hinzufügen
+            // Textfelder zu Panel und Liste hinzufügen
             gbc.gridx = 1;
             JTextField textField = new JTextField(30);
-            addPanel.add(new JLabel(values[i]), gbc);
-            addTupleTextFields.add(textField);
+            addPanel.add(textField, gbc);
+            addTupleTextFields.add(textField); // speichert die Textfelder, um später den Text zu entnehmen
         }
-        //Spalten nach oben ausrichten
+        // Spalten nach oben ausrichten
         gbc.gridx = 0;
         gbc.gridy = values.length;
         gbc.weighty = 1.0;
