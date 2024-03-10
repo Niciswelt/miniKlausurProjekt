@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.*;
@@ -40,6 +42,8 @@ public class DbHelper extends JFrame {
     DbHelper() {
         initialize();
         createComponents();
+        connectTextField.grabFocus();
+        connectTextField.selectAll();
     }
 
     private void initialize() {
@@ -67,12 +71,14 @@ public class DbHelper extends JFrame {
         // connectButton
         connectButton.setFocusable(false);
         connectButton.addActionListener(e -> {
-            // todo
             try {
                 connect(connectTextField.getText());
                 prepareTables();
+
                 tabbedPane.setEnabledAt(1, true);
                 tabbedPane.setEnabledAt(2, true);
+
+                this.setTitle("Database Manager - " + dbName); // aktualisiert Fenstername
             } catch (SQLException ex) {
                 System.out.println("ERR  | " + ex);
                 showMessage(ex.toString());
