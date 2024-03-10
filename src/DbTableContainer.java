@@ -10,5 +10,4 @@ public class DbTableContainer {
     public String tableName;
     public JScrollPane scrollPane;
     public JTable table;
-    public Calendar lastUpdated;
 }
