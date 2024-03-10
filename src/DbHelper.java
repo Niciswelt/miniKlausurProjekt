@@ -1,12 +1,11 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class DbHelper extends JFrame {
 
