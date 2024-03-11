@@ -77,7 +77,8 @@ public class DbHelper extends JFrame {
         connectButton.setFocusable(false);
         connectButton.addActionListener(e -> {
             try {
-                connect(connectTextField.getText());
+                dbName = connectTextField.getText();
+                connect(dbName);
                 prepareTables();
 
                 tabbedPane.setEnabledAt(1, true);
@@ -198,6 +199,7 @@ public class DbHelper extends JFrame {
     private void connect(String dbName) throws SQLException {
         if (dbName.isEmpty()) return; // leerer Name -> return
         con = DriverManager.getConnection("jdbc:mysql://" + dbServer + ":" + dbPort + "/" + dbName, dbUser, dbPasswd);
+        System.out.println("Connected to " + dbName);
     }
 
     /**
