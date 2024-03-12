@@ -14,13 +14,9 @@ public class DbHelper extends JFrame {
     private JPanel connectorPanel;
     private JTextField connectTextField;
     private JButton connectButton;
-    private JPanel dbManagerPanel;
     private JTabbedPane tableTabbedPane;
     private JButton deleteTupleButton;
     private JButton refreshButton;
-    private JScrollPane addScrollPane;
-    private JPanel addPanel;
-    private JButton addTupleButton;
     private JScrollPane sqlAreaScrollPane;
     private JTextArea sqlTextArea;
     private JButton executeButton;
@@ -81,9 +77,6 @@ public class DbHelper extends JFrame {
                 connect(dbName);
                 prepareTables();
 
-                addPanel.removeAll();
-
-                addTupleButton.setEnabled(false);
                 deleteTupleButton.setEnabled(false);
 
                 tabbedPane.setEnabledAt(1, true);
@@ -139,35 +132,6 @@ public class DbHelper extends JFrame {
 
             refreshButton.setEnabled(true);
             deleteTupleButton.setEnabled(true);
-        });
-
-        // addPanel
-        addScrollPane.setViewportView(addPanel);
-
-        // addTupleButton
-        addTupleButton.setFocusable(false);
-        addTupleButton.addActionListener(e -> {
-            int index = tableTabbedPane.getSelectedIndex();
-            String tableName = tableTabbedPane.getTitleAt(index);
-
-            // Baut SQL-Befehl
-            String sql = "INSERT INTO `" + tableName + "` VALUES (";
-            StringBuilder stringBuilder = new StringBuilder(sql); // 'INSERT INTO `tableName` VALUES ("'
-            for (JTextField addTupleTextField : addTupleTextFields) { // 'attributeValue1, attributeValue2,' ...
-                String attributeValue = addTupleTextField.getText();
-                stringBuilder.append("'").append(attributeValue).append("',");
-                addTupleTextField.setText(""); // jeweiliges Textfeld leeren für weitere Nutzung
-            }
-            stringBuilder.deleteCharAt(stringBuilder.length()-1).append(");"); // letztes Komma entfernen, ');' hinzufügen
-
-            // Führt SQL-Befehl aus
-            try {
-                passSQL(new String(stringBuilder));
-                refreshTable(index); // Anzeige wird nach Ausführung aktualisiert
-            } catch (SQLException ex) {
-                System.out.println("ERR  | " + ex);
-                JOptionPane.showMessageDialog(null, "ERROR: "+ex);
-            }
         });
 
         // SQL tab
@@ -281,14 +245,8 @@ public class DbHelper extends JFrame {
         if(!dtc.table.isEnabled()) { //erste Ansicht der Tabelle
             refreshTable(index); //erstellt die Tabelle
             dtc.table.setEnabled(true); //aktiviert table, um die Erstellung nachvollziehen zu können
-            prepareAdd(dtc.table); //richtet addPanel ein
-            return;
         }
-        else {
-            System.out.println("INFO | loaded last known data for " + index);
-        }
-
-        prepareAdd(dtc.table); //richtet addPanel ein
+        else System.out.println("INFO | loaded last known data for " + index);
     }
     /**
      * Aktualisiert die aktuelle Tabelle.
@@ -308,46 +266,6 @@ public class DbHelper extends JFrame {
         } catch (SQLException ex){
             System.out.println("ERR | " + ex);
         }
-    }
-    void prepareAdd(JTable table) {
-        // Aktuelle Anzeige löschen
-        addPanel.removeAll();
-        addTupleTextFields.clear();
-
-        // Spaltennamen erhalten
-        int columnCount = table.getColumnCount();
-        String[] values = new String[columnCount];
-        for (int i = 0; i < columnCount; i++) {
-            values[i] = table.getColumnName(i);
-        }
-
-        // Layout
-        addPanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // Komponenten hinzufügen
-        for (int i = 0; i < values.length; i++) {
-            // Labels hinzufügen
-            gbc.gridx = 0;
-            gbc.gridy = i;
-            addPanel.add(new JLabel(values[i]), gbc);
-
-            // Textfelder zu Panel und Liste hinzufügen
-            gbc.gridx = 1;
-            JTextField textField = new JTextField(30);
-            addPanel.add(textField, gbc);
-            addTupleTextFields.add(textField); // speichert die Textfelder, um später den Text zu entnehmen
-        }
-        // Spalten nach oben ausrichten
-        gbc.gridx = 0;
-        gbc.gridy = values.length;
-        gbc.weighty = 1.0;
-        addPanel.add(Box.createVerticalGlue(), gbc);
-
-        addTupleButton.setEnabled(true);
-        addPanel.repaint();
     }
 
     /**
