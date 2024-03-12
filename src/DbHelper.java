@@ -363,21 +363,25 @@ public class DbHelper extends JFrame {
         ResultSetMetaData rsmd = rs.getMetaData();
         String tableName = rsmd.getTableName(1); // Datenbanktabellenname
 
+        // 'SELECT tableName.id,'
+        StringBuilder builder = new StringBuilder("SELECT " + tableName + ".");
+
+        // 'attribute1, attribute2,' ...
         Vector<Integer> foreignColumns = new Vector<>(); // Vektor, welches die Indexe der Spalten mit Fremdschlüssel enthält
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            if (rsmd.getColumnName(i).startsWith(foreignPrefix)) foreignColumns.add(i);
+            String columnName = rsmd.getColumnName(i);
+            if (columnName.startsWith(foreignPrefix)) foreignColumns.add(i);
+            else builder.append(columnName).append(",");
         }
 
         if (foreignColumns.isEmpty()) return rs; // kein INNER JOIN notwendig, returned das ursprüngliche ResultSet
 
-        // 'SELECT tableName.id,'
-        StringBuilder builder = new StringBuilder("SELECT " + tableName + "." + primaryKey + ",");
-
-        // 'attribute1, attribute2,' ... (die Attribute sind Fremdschlüssel)
+        // 'f_attribute1,f_attribute2,' ...
         for (int columnIndex : foreignColumns) {
             String foreignColumn = rsmd.getColumnName(columnIndex).replace(foreignPrefix, ""); // ohne 'F_'
             builder.append(foreignColumn).append(",");
         }
+
         // löscht das letzte Komma, 'FROM tableName'
         builder.deleteCharAt(builder.length()-1).append("\nFROM ").append(tableName);
 
