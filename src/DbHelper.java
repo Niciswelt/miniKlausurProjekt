@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +117,6 @@ public class DbHelper extends JFrame {
         refreshButton.addActionListener(e -> {
             int index = tableTabbedPane.getSelectedIndex(); // aktuelle Tabelle
             refreshTable(index);
-            repaint();
         });
 
         // table tabbed pane
@@ -209,7 +207,7 @@ public class DbHelper extends JFrame {
     private ResultSet passSQL(String sql) throws SQLException {
         Statement stmt = con.createStatement();
         System.out.println("INFO | Executing SQL:\n" + sql);
-        return stmt.execute(sql) ? stmt.getResultSet() : null;
+        return stmt.execute(sql) ? stmt.getResultSet() : null; // = if(stmt.execute(sql)), dann return getResultSet, sonst return null
     }
 
     /**
@@ -237,7 +235,7 @@ public class DbHelper extends JFrame {
      * muss.
      * <p>
      * Dies trifft zu bei der ersten Anfrage, eine Datenbanktabelle anzuzeigen
-     * @param index der zu anzuzeigenden Tabelle
+     * @param index der anzuzeigenden Tabelle
      */
     void selectTable(int index) {
         DbTableContainer dtc = databaseTablePanels.get(index);
@@ -248,6 +246,7 @@ public class DbHelper extends JFrame {
         }
         else System.out.println("INFO | loaded last known data for " + index);
     }
+
     /**
      * Aktualisiert die aktuelle Tabelle.
      * @param index der zu aktualisierenden Tabelle
