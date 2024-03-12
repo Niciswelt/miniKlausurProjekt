@@ -124,7 +124,7 @@ public class DbHelper extends JFrame {
         refreshButton.setFocusable(false);
         refreshButton.addActionListener(e -> {
             int index = tableTabbedPane.getSelectedIndex(); // aktuelle Tabelle
-            selectTable(index);
+            refreshTable(index);
             repaint();
         });
 
