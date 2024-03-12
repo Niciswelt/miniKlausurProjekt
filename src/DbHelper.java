@@ -54,7 +54,6 @@ public class DbHelper extends JFrame {
         this.setVisible(true);
 
         databaseTablePanels = new ArrayList<>();
-        addTupleTextFields = new ArrayList<>();
     }
 
     private void createComponents() {
