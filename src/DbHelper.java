@@ -81,6 +81,11 @@ public class DbHelper extends JFrame {
                 connect(dbName);
                 prepareTables();
 
+                addPanel.removeAll();
+
+                addTupleButton.setEnabled(false);
+                deleteTupleButton.setEnabled(false);
+
                 tabbedPane.setEnabledAt(1, true);
                 tabbedPane.setEnabledAt(2, true);
 
@@ -93,7 +98,6 @@ public class DbHelper extends JFrame {
 
         //delete Button: Löscht ausgewählte Zeile der Datenbanktabelle
         deleteTupleButton.setFocusable(false);
-        deleteTupleButton.setEnabled(false);
         deleteTupleButton.addActionListener(e -> {
             int index = tableTabbedPane.getSelectedIndex();
             String tableName = tableTabbedPane.getTitleAt(index);
@@ -118,10 +122,10 @@ public class DbHelper extends JFrame {
         });
         //refresh Button: Aktualisiert Tabellenanzeige
         refreshButton.setFocusable(false);
-        refreshButton.setEnabled(false);
         refreshButton.addActionListener(e -> {
             int index = tableTabbedPane.getSelectedIndex(); // aktuelle Tabelle
-            refreshTable(index);
+            selectTable(index);
+            repaint();
         });
 
         // table tabbed pane
@@ -142,7 +146,6 @@ public class DbHelper extends JFrame {
 
         // addTupleButton
         addTupleButton.setFocusable(false);
-        addTupleButton.setEnabled(false);
         addTupleButton.addActionListener(e -> {
             int index = tableTabbedPane.getSelectedIndex();
             String tableName = tableTabbedPane.getTitleAt(index);
