@@ -36,7 +36,6 @@ public class DbHelper extends JFrame {
 
     // Andere
     List<DbTableContainer> databaseTablePanels;
-    List<JTextField> addTupleTextFields;
 
     DbHelper() {
         initialize();
